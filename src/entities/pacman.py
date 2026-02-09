@@ -1,14 +1,15 @@
 import pygame
-from src.utils.constants import TILE_SIZE, YELLOW, PACMAN_SPEED
+from src.utils.constants import TILE_SIZE, YELLOW, PACMAN_SPEED, SCREEN_HEIGHT, SCREEN_WIDTH
 
 class Pacman(pygame.sprite.Sprite):
-    def __init__(self, x, y, walls):
+    def __init__(self, x, y, walls, map_width):
         super().__init__()
 
         self.image = pygame.Surface((TILE_SIZE, TILE_SIZE))
         self.image.fill(YELLOW)
         self.rect = self.image.get_rect()
         self.rect.topleft = (x, y)
+        self.map_width = map_width
 
         self.walls = walls
         self.direction = pygame.Vector2(0, 0)
@@ -69,6 +70,13 @@ class Pacman(pygame.sprite.Sprite):
 
                         self.direction = self.next_direction
                         self.next_direction = pygame.Vector2(0, 0)
+
+        if self.rect.right < 0:
+            self.pos.x = self.map_width
+            self.rect.x = self.map_width
+        elif self.rect.left > self.map_width:
+            self.pos.x = -self.rect.width
+            self.rect.x = -self.rect.width
 
         if not self.check_collision(self.direction):
             self.pos += self.direction * self.speed
