@@ -1,7 +1,9 @@
 import pygame
+from src.utils.constants import TILE_SIZE, BLUE
 
 class Map():
     def __init__(self):
+        self.walls = []
         self.level = [
             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
             [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
@@ -30,12 +32,16 @@ class Map():
             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
         ]
 
+        self.create_walls()
     
-    def draw_map(self, screen):
-        screen.fill((0, 0, 0)) 
-            
+    def create_walls(self):
+        self.walls = []
+
         for y, row in enumerate(self.level):
             for x, tile in enumerate(row):
                 if tile == 1:
-                    pygame.draw.rect(screen, (33, 33, 255), (x * 16, y * 16, 16, 16), 2) 
-        pygame.display.flip() 
+                    self.walls.append(pygame.Rect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE))
+
+    def draw_map(self, screen):
+        for wall in self.walls:
+            pygame.draw.rect(screen, BLUE, wall, 2)
