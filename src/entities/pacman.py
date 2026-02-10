@@ -5,8 +5,12 @@ class Pacman(pygame.sprite.Sprite):
     def __init__(self, x, y, walls):
         super().__init__()
 
-        self.image = pygame.Surface((TILE_SIZE, TILE_SIZE))
-        self.image.fill(YELLOW)
+        self.import_assets()
+
+        self.frame_index = 0
+        self.animation_speed = 0.1
+        self.image = self.current_animation[self.frame_index]
+
         self.rect = self.image.get_rect()
         self.rect.topleft = (x, y)
 
@@ -18,8 +22,6 @@ class Pacman(pygame.sprite.Sprite):
 
         self.pos = pygame.Vector2(self.rect.topleft)
         self.start_pos = self.pos.copy()
-
-        self.import_assets()
 
     def get_input(self):
         keys = pygame.key.get_pressed()
@@ -94,21 +96,21 @@ class Pacman(pygame.sprite.Sprite):
         try:
             sprite_sheet = pygame.image.load(path).convert_alpha()
 
-            frame_width = 15
-            frame_height = 15
+            sheet_width, sheet_height = sprite_sheet.get_size()
+            frame_width, frame_height = sheet_width / 9, sheet_height
 
             frames = []
 
             for i in range(9):
                 rect = pygame.Rect(i * frame_width, 0, frame_width, frame_height)
-                frame = sprite_sheet.subsurface(rect)
+                frame = sprite_sheet.subsurface(rect).copy()
                 frame = pygame.transform.scale(frame, (TILE_SIZE, TILE_SIZE))
                 frames.append(frame)
 
-            self.animations["left"] = [frames[0], frames[1], frames[2], frames[1]]
-            self.animations["right"] = [frames[0], frames[3], frames[4], frames[3]]
-            self.animations["down"] = [frames[0], frames[5], frames[6], frames[5]]
-            self.animations["up"] = [frames[0], frames[7], frames[8], frames[7]]
+            self.animations["right"] = [frames[0], frames[1], frames[2], frames[1]]
+            self.animations["left"] = [frames[0], frames[3], frames[4], frames[3]]
+            self.animations["up"] = [frames[0], frames[5], frames[6], frames[5]]
+            self.animations["down"] = [frames[0], frames[7], frames[8], frames[7]]
 
             self.current_animation = self.animations["right"]
 
@@ -125,6 +127,27 @@ class Pacman(pygame.sprite.Sprite):
 
         self.pos = self.start_pos.copy()
 
+    def animate(self):
+        if self.direction == pygame.Vector2(-1, 0):
+            self.current_animation = self.animations["left"]
+        elif self.direction == pygame.Vector2(1, 0):
+            self.current_animation = self.animations["right"]
+        elif self.direction == pygame.Vector2(0, -1):
+            self.current_animation = self.animations["up"]
+        elif self.direction == pygame.Vector2(0, 1):
+            self.current_animation = self.animations["down"]
+
+        if self.direction.magnitude() != 0:
+            self.frame_index += self.animation_speed
+
+            if self.frame_index >= len(self.current_animation):
+                self.frame_index = 0
+        else:
+            self.frame_index = 0
+
+        self.image = self.current_animation[int(self.frame_index)]
+
     def update(self):
         self.get_input()
         self.move()
+        self.animate()
