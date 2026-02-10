@@ -19,6 +19,8 @@ class Pacman(pygame.sprite.Sprite):
         self.pos = pygame.Vector2(self.rect.topleft)
         self.start_pos = self.pos.copy()
 
+        self.import_assets()
+
     def get_input(self):
         keys = pygame.key.get_pressed()
         
@@ -84,6 +86,36 @@ class Pacman(pygame.sprite.Sprite):
             self.rect.topleft = self.pos.x, self.pos.y
         else:
             self.rect.topleft = self.pos.x, self.pos.y
+
+    def import_assets(self):
+        path = 'src/assets/pacman/pacman.png'
+        self.animations = {}
+
+        try:
+            sprite_sheet = pygame.image.load(path).convert_alpha()
+
+            frame_width = 15
+            frame_height = 15
+
+            frames = []
+
+            for i in range(9):
+                rect = pygame.Rect(i * frame_width, 0, frame_width, frame_height)
+                frame = sprite_sheet.subsurface(rect)
+                frame = pygame.transform.scale(frame, (TILE_SIZE, TILE_SIZE))
+                frames.append(frame)
+
+            self.animations["left"] = [frames[0], frames[1], frames[2], frames[1]]
+            self.animations["right"] = [frames[0], frames[3], frames[4], frames[3]]
+            self.animations["down"] = [frames[0], frames[5], frames[6], frames[5]]
+            self.animations["up"] = [frames[0], frames[7], frames[8], frames[7]]
+
+            self.current_animation = self.animations["right"]
+
+        except FileNotFoundError:
+            print(f"Error: Sprite sheet not found at {path}")
+
+            self.current_animation = [self.image]
 
     def reset_position(self):
         self.rect.topleft = self.start_pos.copy()
