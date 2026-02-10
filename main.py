@@ -2,14 +2,12 @@ import pygame
 from src.utils.constants import WIDTH, HEIGHT, TILE_SIZE, BLACK
 from src.map.testMap import Map
 from src.entities.pacman import Pacman
-from src.entities.ghost import Pinky, Inky, Sue, Clyde, Ghost
+from src.entities.ghost import Pinky,  Ghost
 
 game_map = Map()
 ghosts = [ 
-    Pinky(),
-    Inky(),
-    Sue(),
-    Clyde()
+    Pinky(game_map.walls)
+
 ]
 
 if __name__ == "__main__":

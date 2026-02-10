@@ -1,18 +1,20 @@
 import pygame
 from abc import ABC, abstractmethod
-from src.utils.constants import TILE_SIZE, GHOSTS_SPEED
+from src.utils.constants import TILE_SIZE, GHOSTS_SPEED, WIDTH
 import random
 
 class Ghost(pygame.sprite.Sprite, ABC):
-    def __init__(self):
+    def __init__(self, walls):
         super().__init__()
 
-        self.mode = "Scattering"
-        self.speed = 2
-        self.pos = pygame.Rect(9*TILE_SIZE, 12*TILE_SIZE, TILE_SIZE, TILE_SIZE)
+        self.model = pygame.Rect(6*TILE_SIZE, 12*TILE_SIZE, TILE_SIZE, TILE_SIZE)
+        self.pos = pygame.Vector2(self.model.topleft)
+
+        self.direction = pygame.Vector2(0, 0)
+        self.next_direction = pygame.Vector2(0, 0)
+
+        self.walls = walls
         
-        
-    
     @property
     @abstractmethod
     def image(self):
@@ -22,13 +24,22 @@ class Ghost(pygame.sprite.Sprite, ABC):
     def move(self):
         pass
 
+    def check_colision(self, direction):
+        next_pos = self.model.copy()
+        next_pos.move_ip(direction * GHOSTS_SPEED)
+
+        if next_pos.collidelist(self.walls) > -1:
+            return True
+        
+        return False
+
 
 #Pinky, Inky, Sue, Clyde
 class Pinky(Ghost):
     start_sprite = (0, 0)
     end_sprite = (16, 16)
-    def __init__(self):
-        super().__init__()
+    def __init__(self, walls):
+        super().__init__(walls)
     
     @property
     def image(self):
@@ -37,15 +48,31 @@ class Pinky(Ghost):
         return curr_sprite
 
     def move(self):
-        x = random.randint(-GHOSTS_SPEED, GHOSTS_SPEED)
-        y = random.randint(-GHOSTS_SPEED, GHOSTS_SPEED)
+        x = random.randint(-1, 1)
+        y = random.randint(-1, 1)
+        self.next_direction = pygame.Vector2(x, y)
+        if self.next_direction != pygame.Vector2(0,0):
+            if self.direction != self.next_direction:
+                if not self.check_colision(self.next_direction):
+                    self.direction = self.next_direction
+                    self.next_direction = pygame.Vector2(0,0)
 
-        self.pos = pygame.Rect.move(self.pos, x, y)
+        if self.model.right < 0:
+            self.pos.x = WIDTH
+            self.model.x = WIDTH
+        elif self.model.left > WIDTH:
+            self.pos.x = -self.model.width
+            self.model.x = -self.model.width
 
+        if not self.check_colision(self.direction):
+            self.pos += self.direction * GHOSTS_SPEED
+            self.model.topleft = self.pos.x, self.pos.y
+        else:
+            self.model.topleft = self.pos.x, self.pos.y
 
     def update(self):
         self.move()
-
+'''
 class Inky(Ghost):
     start_sprite = (0, 0)
     end_sprite = (16, 16)
@@ -111,3 +138,4 @@ class Clyde(Ghost):
 
     def update(self):
         self.move()
+'''
