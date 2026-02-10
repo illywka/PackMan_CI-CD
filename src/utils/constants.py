@@ -8,4 +8,6 @@ BLACK = (0, 0, 0)
 YELLOW = (255, 255, 0)
 BLUE  = (33, 33, 255)
 RED = (255, 0, 0)
+
 PACMAN_SPEED = 2
+GHOSTS_SPEED = 2

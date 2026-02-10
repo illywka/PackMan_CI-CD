@@ -2,10 +2,15 @@ import pygame
 from src.utils.constants import WIDTH, HEIGHT, TILE_SIZE, BLACK
 from src.map.testMap import Map
 from src.entities.pacman import Pacman
-from src.entities.ghost import Ghost, Blinky
+from src.entities.ghost import Pinky, Inky, Sue, Clyde, Ghost
 
 game_map = Map()
-ghost = Blinky()
+ghosts = [ 
+    Pinky(),
+    Inky(),
+    Sue(),
+    Clyde()
+]
 
 if __name__ == "__main__":
     pygame.init() 
@@ -21,10 +26,13 @@ if __name__ == "__main__":
                 running = False
 
         player.update()
+        
         screen.fill(BLACK)
         game_map.draw_map(screen)
         screen.blit(player.image, player.rect)
-        screen.blit(ghost.image, ghost.spawn_point)
+        for ghost in ghosts:
+            screen.blit(ghost.image, ghost.pos)
+            ghost.update()
 
         pygame.display.flip()
 
