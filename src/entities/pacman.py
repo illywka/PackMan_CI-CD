@@ -4,12 +4,12 @@ from src.utils.constants import TILE_SIZE, YELLOW, PACMAN_SPEED, WIDTH
 class Pacman(pygame.sprite.Sprite):
     def __init__(self, x, y, walls):
         super().__init__()
-
         self.import_assets()
 
         self.frame_index = 0
         self.animation_speed = 0.1
         self.image = self.current_animation[self.frame_index]
+        self.original_image = self.image.copy()
 
         self.rect = self.image.get_rect()
         self.rect.topleft = (x, y)
@@ -22,6 +22,9 @@ class Pacman(pygame.sprite.Sprite):
 
         self.pos = pygame.Vector2(self.rect.topleft)
         self.start_pos = self.pos.copy()
+
+        self.animations = None
+        self.current_animation = None
 
     def get_input(self):
         keys = pygame.key.get_pressed()
@@ -90,20 +93,22 @@ class Pacman(pygame.sprite.Sprite):
             self.rect.topleft = self.pos.x, self.pos.y
 
     def import_assets(self):
-        path = 'src/assets/pacman/pacman_move.png'
+        path_move = 'src/assets/pacman/pacman_move.png'
+        path_death = 'src/assets/pacman/pacman_death.png'
         self.animations = {}
 
         try:
-            sprite_sheet = pygame.image.load(path).convert_alpha()
+            sprite_sheet_move = pygame.image.load(path_move).convert_alpha()
+            sprite_sheet_death = pygame.image.load(path_death).convert_alpha()
 
-            sheet_width, sheet_height = sprite_sheet.get_size()
+            sheet_width, sheet_height = sprite_sheet_move.get_size()
             frame_width, frame_height = sheet_width / 9, sheet_height
 
             frames = []
 
             for i in range(9):
                 rect = pygame.Rect(i * frame_width, 0, frame_width, frame_height)
-                frame = sprite_sheet.subsurface(rect).copy()
+                frame = sprite_sheet_move.subsurface(rect).copy()
                 frame = pygame.transform.scale(frame, (TILE_SIZE, TILE_SIZE))
                 frames.append(frame)
 
@@ -146,6 +151,10 @@ class Pacman(pygame.sprite.Sprite):
             self.frame_index = 0
 
         self.image = self.current_animation[int(self.frame_index)]
+
+    def reset_image(self):
+        self.image = self.original_image.copy()
+        self.rect = self.image.get_rect(topleft = (self.start_pos.x, self.start_pos.y))
 
     def update(self):
         self.get_input()
