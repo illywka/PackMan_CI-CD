@@ -55,22 +55,4 @@ class RandomMap():
         return level
 
     level = generate_pacman_maze()
-    running = True
-    clock = pygame.time.Clock()
-
-    while running:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-
-        screen.fill(BLACK)
-        for y in range(GRID_HEIGHT):
-            for x in range(GRID_WIDTH):
-                if level[y][x] == 1:
-                    rect = (x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE)
-                    pygame.draw.rect(screen, BLUE, rect)
-                    pygame.draw.rect(screen, (0, 0, 150), rect, 1)
-
-        pygame.display.flip()
-        clock.tick(FPS)
 
