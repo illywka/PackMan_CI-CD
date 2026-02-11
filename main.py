@@ -5,12 +5,6 @@ from src.entities.pacman import Pacman
 from src.entities.ghost import Pinky, Inky, Clyde, Sue,  Ghost
 
 game_map = Map()
-ghosts = [ 
-    Pinky(game_map.walls),
-    Inky(game_map.walls),
-    Clyde(game_map.walls),
-    Sue(game_map.walls)
-]
 
 if __name__ == "__main__":
     pygame.init() 
@@ -18,6 +12,13 @@ if __name__ == "__main__":
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     clock = pygame.time.Clock()
     player = Pacman(TILE_SIZE, TILE_SIZE, game_map.walls)
+
+    ghosts = [ 
+        Pinky(game_map.level, game_map.walls, player.pos),
+        Inky(game_map.level, game_map.walls, player.pos),
+        Clyde(game_map.level, game_map.walls, player.pos),
+        Sue(game_map.level, game_map.walls, player.pos)
+    ]
     
     running = True
     while running:
