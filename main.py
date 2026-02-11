@@ -35,13 +35,6 @@ if __name__ == "__main__":
 
         if collision:
             player.lives -= 1
-
-            screen.fill(BLACK)
-            game_map.draw_map(screen)
-            screen.blit(player.image, player.rect)
-            ghosts_group.draw(screen)
-            pygame.display.flip()
-
             pygame.time.delay(1000)
 
             if player.lives <= 0:
