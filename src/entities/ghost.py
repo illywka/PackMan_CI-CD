@@ -1,16 +1,13 @@
 import pygame
-import sys
+
 from collections import deque
 from abc import ABC, abstractmethod
 from src.utils.constants import TILE_SIZE, GHOST_SPEED, WIDTH, FPS
+
 import random
 
-from collections import deque as queue
-
-from src.map.testMap import Map
-
 class Ghost(pygame.sprite.Sprite, ABC):
-    def __init__(self, level, walls, pacman_pos):
+    def __init__(self, game_map, pacman):
         super().__init__()
 
         self.model = pygame.Rect(9*TILE_SIZE, 12*TILE_SIZE, TILE_SIZE, TILE_SIZE)
@@ -19,9 +16,8 @@ class Ghost(pygame.sprite.Sprite, ABC):
         self.direction = pygame.Vector2(0, -1)
         self.next_direction = pygame.Vector2(0, 0)
         self.clock = pygame.time.Clock()
-        self.level = level
-        self.walls = walls
-        self.pacman_pos = pacman_pos
+        self.game_map = game_map
+        self.pacman = pacman
 
         self.sprite_start = (0, 0)
         self.sprite_width = (16, 16)
@@ -39,7 +35,7 @@ class Ghost(pygame.sprite.Sprite, ABC):
         next_pos = self.model.copy()
         next_pos.move_ip(direction * GHOST_SPEED)
 
-        if next_pos.collidelist(self.walls) > -1:
+        if next_pos.collidelist(self.game_map.walls) > -1:
             return True
         
         return False
@@ -107,31 +103,44 @@ class Ghost(pygame.sprite.Sprite, ABC):
             dir.append((path[i][1]-path[i+1][1], path[i][0]-path[i+1][0]))
         return dir[::-1]
 
+    def future_pos(self, pos, dir):
+        return int(pos[0])//TILE_SIZE + int(dir[1]), int(pos[1])//TILE_SIZE + int(dir[0])
+    
+    def predict_future_position(self):
+        dir = self.pacman.direction
+        pos = self.pacman.pos
+        directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+        for _ in range(1, 5):
+            for i in range(0, 4):
+                y, x = self.future_pos(pos, dir)
+                if self.game_map.level[x][y] != 0:
+                    dir = pygame.Vector2(directions[i])
+                    continue
+                else:
+                    break
+            predict_pos = self.future_pos(pos, dir)
+            pos = pygame.Vector2(predict_pos[0]*TILE_SIZE, predict_pos[1]*TILE_SIZE)
+        return predict_pos[1], predict_pos[0]
 
 #Pinky, Inky, Sue, Clyde
 class Pinky(Ghost):
     sprite = pygame.image.load(f'src/assets/ghosts/pink_ghost/pink_ghost.png')
-    def __init__(self, walls, pacman_pos, level):
-        super().__init__(walls, pacman_pos, level)
+    def __init__(self, game_map, pacman):
+        super().__init__(game_map, pacman)
     
     @property
     def image(self):
         return self.change_sprite()
 
     def move(self):
-        x = random.randint(-1, 1)
-        y = random.randint(-1, 1)
-        self.next_direction = pygame.Vector2(x, y)
-
-        if self.next_direction != pygame.Vector2(0,0):
-            if self.next_direction == -self.direction:
-                self.direction = self.next_direction
-                self.next_direction = pygame.Vector2(0, 0)
+        if self.is_centered():
+            path = self.bfs_pacman(self.game_map.level, (int(self.pos[1])//TILE_SIZE, int(self.pos[0])//TILE_SIZE), (self.predict_future_position()))
+            if path is not None and len(path) > 0:
+                self.next_direction = pygame.Vector2(path[0])
                 
             if self.direction != self.next_direction:
                 if not self.check_collision(self.next_direction):
                     self.direction = self.next_direction
-                    self.next_direction = pygame.Vector2(0,0)
 
         if self.model.right < 0:
             self.pos.x = WIDTH
@@ -141,7 +150,7 @@ class Pinky(Ghost):
             self.model.x = -self.model.width
 
         if not self.check_collision(self.direction):
-            self.pos += self.direction * GHOST_SPEED
+            self.pos += self.direction * GHOST_SPEED * 2 #!!! Для тестування, потім замінити !!!
             self.model.topleft = self.pos.x, self.pos.y
         else:
             self.model.topleft = self.pos.x, self.pos.y
@@ -151,27 +160,22 @@ class Pinky(Ghost):
 
 class Inky(Ghost):
     sprite = pygame.image.load(f'src/assets/ghosts/cyan_ghost/cyan_ghost.png')
-    def __init__(self, walls, pacman_pos, level):
-        super().__init__(walls, pacman_pos, level)
+    def __init__(self, game_map, pacman):
+        super().__init__(game_map, pacman)
     
     @property
     def image(self):
         return self.change_sprite()
 
     def move(self):
-        x = random.randint(-1, 1)
-        y = random.randint(-1, 1)
-        self.next_direction = pygame.Vector2(x, y)
-
-        if self.next_direction != pygame.Vector2(0,0):
-            if self.next_direction == -self.direction:
-                self.direction = self.next_direction
-                self.next_direction = pygame.Vector2(0, 0)
+        if self.is_centered():
+            path = self.bfs_pacman(self.game_map.level, (int(self.pos[1])//TILE_SIZE, int(self.pos[0])//TILE_SIZE), (self.predict_future_position()))
+            if path is not None and len(path) > 0:
+                self.next_direction = pygame.Vector2(path[0])
                 
             if self.direction != self.next_direction:
                 if not self.check_collision(self.next_direction):
                     self.direction = self.next_direction
-                    self.next_direction = pygame.Vector2(0,0)
 
         if self.model.right < 0:
             self.pos.x = WIDTH
@@ -192,8 +196,8 @@ class Inky(Ghost):
 class Sue(Ghost):
     sprite = pygame.image.load(f'src/assets/ghosts/purple_ghost/purple_ghost.png')
     
-    def __init__(self, walls, pacman_pos, level):
-        super().__init__(walls, pacman_pos, level)
+    def __init__(self, game_map, pacman):
+        super().__init__(game_map, pacman)
     
     @property
     def image(self):
@@ -201,8 +205,8 @@ class Sue(Ghost):
 
     def move(self):
         if self.is_centered():
-            path = self.bfs_pacman(self.level, (int(self.pos[1])//TILE_SIZE, int(self.pos[0])//TILE_SIZE), (int(self.pacman_pos[1])//TILE_SIZE, int(self.pacman_pos[0])//TILE_SIZE))
-            if len(path)> 0:
+            path = self.bfs_pacman(self.game_map.level, (int(self.pos[1])//TILE_SIZE, int(self.pos[0])//TILE_SIZE), (int(self.pacman.pos[1])//TILE_SIZE, int(self.pacman.pos[0])//TILE_SIZE))
+            if path is not None and len(path) > 0:
                 self.next_direction = pygame.Vector2(path[0])
                 
             if self.direction != self.next_direction:
@@ -227,8 +231,8 @@ class Sue(Ghost):
 
 class Clyde(Ghost):
     sprite = pygame.image.load(f'src/assets/ghosts/brown_ghost/brown_ghost.png')
-    def __init__(self, walls, pacman_pos, level):
-        super().__init__(walls, pacman_pos, level)
+    def __init__(self, game_map, pacman):
+        super().__init__(game_map, pacman)
 
     @property
     def image(self):
