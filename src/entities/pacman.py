@@ -23,9 +23,6 @@ class Pacman(pygame.sprite.Sprite):
         self.pos = pygame.Vector2(self.rect.topleft)
         self.start_pos = self.pos.copy()
 
-        self.animations = None
-        self.current_animation = None
-
     def get_input(self):
         keys = pygame.key.get_pressed()
         
@@ -101,26 +98,44 @@ class Pacman(pygame.sprite.Sprite):
             sprite_sheet_move = pygame.image.load(path_move).convert_alpha()
             sprite_sheet_death = pygame.image.load(path_death).convert_alpha()
 
-            sheet_width, sheet_height = sprite_sheet_move.get_size()
-            frame_width, frame_height = sheet_width / 9, sheet_height
+            move_frame_count = 9
+            death_frame_count = 11
 
-            frames = []
+            move_sheet_width, move_sheet_height = sprite_sheet_move.get_size()
+            move_frame_width = move_sheet_width / move_frame_count
 
-            for i in range(9):
-                rect = pygame.Rect(i * frame_width, 0, frame_width, frame_height)
-                frame = sprite_sheet_move.subsurface(rect).copy()
-                frame = pygame.transform.scale(frame, (TILE_SIZE, TILE_SIZE))
-                frames.append(frame)
+            death_sheet_width, death_sheet_height = sprite_sheet_death.get_size()
+            death_frame_width = death_sheet_width / death_frame_count
 
-            self.animations["right"] = [frames[0], frames[1], frames[2], frames[1]]
-            self.animations["left"] = [frames[0], frames[3], frames[4], frames[3]]
-            self.animations["up"] = [frames[0], frames[5], frames[6], frames[5]]
-            self.animations["down"] = [frames[0], frames[7], frames[8], frames[7]]
+            move_frames = []
+            death_frames = []
+
+            for i in range(move_frame_count):
+                rect = pygame.Rect(i * move_frame_width, 0, move_frame_width, move_sheet_height)
+
+                move_frame = sprite_sheet_move.subsurface(rect).copy()
+                move_frame = pygame.transform.scale(move_frame, (TILE_SIZE, TILE_SIZE))
+
+                move_frames.append(move_frame)
+
+            for i in range(death_frame_count):
+                rect = pygame.Rect(i * death_frame_width, 0, death_frame_width, death_sheet_height)
+
+                death_frame = sprite_sheet_death.subsurface(rect).copy()
+                death_frame = pygame.transform.scale(death_frame, (TILE_SIZE, TILE_SIZE))
+
+                death_frames.append(death_frame)
+
+            self.animations["right"] = [move_frames[0], move_frames[1], move_frames[2], move_frames[1]]
+            self.animations["left"] = [move_frames[0], move_frames[3], move_frames[4], move_frames[3]]
+            self.animations["up"] = [move_frames[0], move_frames[5], move_frames[6], move_frames[5]]
+            self.animations["down"] = [move_frames[0], move_frames[7], move_frames[8], move_frames[7]]
+            self.animations["death"] = death_frames
 
             self.current_animation = self.animations["right"]
 
         except FileNotFoundError:
-            print(f"Error: Sprite sheet not found at {path}")
+            print(f"Error: Sprite sheet not found at path")
 
             self.current_animation = [self.image]
 
