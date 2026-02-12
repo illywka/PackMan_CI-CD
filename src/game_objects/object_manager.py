@@ -1,4 +1,5 @@
 import random
+import time
 from collections import deque
 from src.game_objects.pellet import Pellet
 from src.game_objects.boost import CakeBoost, StrawberryBoost, WatermelonBoost
@@ -10,6 +11,8 @@ class ObjectManager:
         self.pellets = []
         self.boosts = []
         self.current_boost = None
+        self.last_boost_time = 0
+        self.boost_interval = 10
 
     def is_walkable(self, x, y):
         return self.map.level[y][x] == 0
@@ -77,7 +80,14 @@ class ObjectManager:
 
         boost_class = random.choice([CakeBoost, StrawberryBoost, WatermelonBoost])
         self.current_boost = boost_class(pixel_x, pixel_y)
-        
+    
+    def update_boost(self):
+        current_time = time.time()
+        if current_time - self.last_boost_time >= self.boost_interval:
+            self.current_boost = None
+            self.spawn_boost()
+            self.last_boost_time = current_time
+
     def draw_objects(self, screen):
         for pellet in self.pellets:
             pellet.draw(screen)

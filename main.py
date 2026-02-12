@@ -63,6 +63,8 @@ if __name__ == "__main__":
 
                 for ghost in ghosts_group:
                     ghost.reset_position()
+        
+        objects.update_boost()
 
         screen.fill(BLACK)
         game_map.draw_map(screen)
