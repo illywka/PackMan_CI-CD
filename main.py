@@ -48,8 +48,23 @@ if __name__ == "__main__":
         ghosts_group.update()
 
         collision = pygame.sprite.spritecollide(player, ghosts_group, False)
+        colide = []
+
+        for i in range(len(collision)):
+            if collision[i].is_dead != True:
+                colide = [collision[i]]
+
+        if len(colide) > 0 and colide is not None:
+            colide[0].is_dead = True
+            colide.pop()
+        
+
+        for ghost in ghosts_group:
+            if ghost.pos == ghost.start_pos:
+                ghost.is_dead = False
 
         if collision:
+            '''
             player.lives -= 1
             play_death_animation(clock, player)
             pygame.time.delay(300)
@@ -61,6 +76,7 @@ if __name__ == "__main__":
 
                 for ghost in ghosts_group:
                     ghost.reset_position()
+            '''
 
         screen.fill(BLACK)
         game_map.draw_map(screen)
