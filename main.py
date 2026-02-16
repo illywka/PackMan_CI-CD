@@ -59,17 +59,23 @@ if __name__ == "__main__":
         collision = pygame.sprite.spritecollide(player, ghosts_group, False)
 
         if collision:
-            player.lives -= 1
-            play_death_animation(clock, player)
-            pygame.time.delay(300)
-
-            if player.lives <= 0:
-                running = False
-            else:
-                player.reset_position()
-
+            if player.shielded:
+                player.shielded = False
+                del player.active_boosts["shield"]
                 for ghost in ghosts_group:
                     ghost.reset_position()
+            else:
+                player.lives -= 1
+                play_death_animation(clock, player)
+                pygame.time.delay(300)
+
+                if player.lives <= 0:
+                    running = False
+                else:
+                    player.reset_position()
+
+                    for ghost in ghosts_group:
+                        ghost.reset_position()
 
 
         screen.fill(BLACK)

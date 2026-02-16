@@ -21,3 +21,4 @@ def check_collision(self, direction):
             return True
         
         return False
+

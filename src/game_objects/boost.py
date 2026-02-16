@@ -1,6 +1,6 @@
-import pygame
-import os
+import pygame, os, time
 from abc import ABC, abstractmethod
+from src.utils.constants import PACMAN_SPEED, BOOST_DURATION
 
 ASSETS_PATH = os.path.join(os.path.dirname(__file__), "..", "assets", "boosts")
 BOOST_CONFIGS = {
@@ -35,14 +35,14 @@ class Boost(ABC):
 
 class CakeBoost(Boost):
     def apply_effect(self, pacman):
-        print("ate a cake")
+        pacman.speed = PACMAN_SPEED + 2
+        pacman.active_boosts["speed"] = time.time() + BOOST_DURATION
 
 class StrawberryBoost(Boost):
     def apply_effect(self, pacman):
-        #pacman.score += 200
-        print("ate a strawberry")
+        pacman.score += 1000  #можна змінити з часом
 
 class WatermelonBoost(Boost):
     def apply_effect(self, pacman):
-        #pacman.invincible = True
-        print("ate a watermelon")
+        pacman.shielded = True
+        pacman.active_boosts["shield"] = time.time() + BOOST_DURATION
