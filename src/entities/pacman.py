@@ -1,6 +1,7 @@
 import pygame
 from src.utils.constants import TILE_SIZE, PACMAN_SPEED, WIDTH
 import src.entities.entity as entity
+import time
 
 class Pacman(pygame.sprite.Sprite):
     def __init__(self, x, y, game_map):
@@ -21,6 +22,10 @@ class Pacman(pygame.sprite.Sprite):
         self.speed = PACMAN_SPEED
         self.lives = 3
         self.score = 0
+        
+        self.active_boosts = {}
+        self.base_speed = PACMAN_SPEED
+        self.shielded = False
 
         self.pos = pygame.Vector2(self.rect.topleft)
         self.start_pos = self.pos.copy()
@@ -46,11 +51,11 @@ class Pacman(pygame.sprite.Sprite):
             elif entity.is_centered(self):
                 if self.direction != self.next_direction:
                     if not entity.check_collision(self, self.next_direction):
-                        current_tile_x = (self.rect.centerx // TILE_SIZE) * TILE_SIZE
-                        current_tile_y = (self.rect.centery // TILE_SIZE) * TILE_SIZE
+                        current_tile_x = (self.rect.centerx // TILE_SIZE) * TILE_SIZE + TILE_SIZE // 2
+                        current_tile_y = (self.rect.centery // TILE_SIZE) * TILE_SIZE + TILE_SIZE // 2
 
-                        self.pos.x = current_tile_x
-                        self.pos.y = current_tile_y
+                        self.pos.x = current_tile_x - TILE_SIZE // 2
+                        self.pos.y = current_tile_y - TILE_SIZE // 2
                         self.rect.topleft = (self.pos.x, self.pos.y)
 
                         self.direction = self.next_direction
@@ -150,8 +155,21 @@ class Pacman(pygame.sprite.Sprite):
     def reset_image(self):
         self.image = self.original_image.copy()
         self.rect = self.image.get_rect(topleft = (self.start_pos.x, self.start_pos.y))
+    
+    def update_boost(self):
+        current_time = time.time()
+
+        if "speed" in self.active_boosts:
+            if current_time > self.active_boosts["speed"]:
+                del self.active_boosts["speed"]
+                self.speed = self.base_speed
+        if "shield" in self.active_boosts:
+            if current_time > self.active_boosts["shield"]:
+                del self.active_boosts["shield"]
+                self.shielded = False
 
     def update(self):
         self.get_input()
         self.move()
         self.animate()
+        self.update_boost()
