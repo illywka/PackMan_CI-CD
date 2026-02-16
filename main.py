@@ -23,11 +23,17 @@ def play_death_animation(_clock, _player):
 
         _clock.tick(10)
 
+def draw_score(screen, font, score):
+    score_text = font.render(str(score), True, (255, 0, 0))
+    score_rect = score_text.get_rect(center=(WIDTH // 2, 8))
+    screen.blit(score_text, score_rect)
+
 if __name__ == "__main__":
     pygame.init() 
 
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     clock = pygame.time.Clock()
+    font = pygame.font.SysFont(None, 28)
     player = Pacman(TILE_SIZE, TILE_SIZE, game_map)
 
     ghosts = [ 
@@ -39,6 +45,7 @@ if __name__ == "__main__":
 
     ghosts_group = pygame.sprite.Group(ghosts)
     objects = ObjectManager(game_map)
+    objects.spawn_pellets(player)
     
     running = True
     while running:
@@ -63,15 +70,17 @@ if __name__ == "__main__":
 
                 for ghost in ghosts_group:
                     ghost.reset_position()
-        
-        objects.update_boost()
+
 
         screen.fill(BLACK)
         game_map.draw_map(screen)
-        objects.draw_objects(screen)
-        objects.spawn_boost()
         screen.blit(player.image, player.rect)
         ghosts_group.draw(screen)
+
+        objects.update_boost()
+        objects.update_objects(player)
+        objects.draw_objects(screen)
+        draw_score(screen, font, player.score)
 
         pygame.display.flip()
         clock.tick(FPS)
