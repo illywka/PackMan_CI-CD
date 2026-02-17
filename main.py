@@ -32,6 +32,7 @@ def init_game():
 
 
 def play_death_animation(_clock, _player):
+    _player.sound_manager.stop_sound('ghosts_normal_move')
     _player.sound_manager.play_sound('pacman_death')
 
     for frame in _player.animations["death"]:
@@ -109,6 +110,7 @@ if __name__ == "__main__":
         elif game_state == "game":
             player.update()
             ghosts_group.update()
+            player.sound_manager.play_sound_if_idle('ghosts_normal_move')
 
             collision = pygame.sprite.spritecollide(player, ghosts_group, False)
             real_collision = []
