@@ -32,6 +32,8 @@ def init_game():
 
 
 def play_death_animation(_clock, _player):
+    _player.sound_manager.play_sound('pacman_death')
+
     for frame in _player.animations["death"]:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -46,7 +48,7 @@ def play_death_animation(_clock, _player):
         screen.blit(frame, shifted_rect)
         pygame.display.flip()
 
-        _clock.tick(10)
+        _clock.tick(5)
 
 def draw_score(screen, font, score):
     score_text = font.render(str(score), True, (255, 0, 0))
