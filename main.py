@@ -1,6 +1,6 @@
 import pygame
 import random
-from src.utils.constants import WIDTH, HEIGHT, TILE_SIZE, BLACK, FPS
+from src.utils.constants import WIDTH, HEIGHT, TILE_SIZE, BLACK, FPS, MAP_OFFSET_Y
 from src.map.testMap import Map
 from src.entities.pacman import Pacman
 from src.entities.ghost import Pinky, Inky, Clyde, Sue
@@ -21,15 +21,17 @@ def play_death_animation(_clock, _player):
 
         screen.fill(BLACK)
         game_map.draw_map(screen)
-        ghosts_group.draw(screen)
-        screen.blit(frame, player.rect)
+        for ghost in ghosts_group:
+            screen.blit(ghost.image, ghost.rect.move(0, MAP_OFFSET_Y))
+        shifted_rect = player.rect.move(0, MAP_OFFSET_Y)
+        screen.blit(frame, shifted_rect)
         pygame.display.flip()
 
         _clock.tick(10)
 
 def draw_score(screen, font, score):
     score_text = font.render(str(score), True, (255, 0, 0))
-    score_rect = score_text.get_rect(center=(WIDTH // 2, 8))
+    score_rect = score_text.get_rect(center=(WIDTH // 2, MAP_OFFSET_Y // 2))
     screen.blit(score_text, score_rect)
 
 if __name__ == "__main__":
@@ -84,8 +86,9 @@ if __name__ == "__main__":
 
         screen.fill(BLACK)
         game_map.draw_map(screen)
-        screen.blit(player.image, player.rect)
-        ghosts_group.draw(screen)
+        screen.blit(player.image, player.rect.move(0, MAP_OFFSET_Y))
+        for ghost in ghosts_group:
+            screen.blit(ghost.image, ghost.rect.move(0, MAP_OFFSET_Y))
 
         objects.update_boost()
         objects.update_objects(player)

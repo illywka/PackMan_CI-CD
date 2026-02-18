@@ -1,6 +1,6 @@
 import pygame
 import random
-from src.utils.constants import TILE_SIZE, GRID_HEIGHT, GRID_WIDTH, WIDTH, HEIGHT, BLUE, BLACK, FPS
+from src.utils.constants import TILE_SIZE, GRID_HEIGHT, GRID_WIDTH, WIDTH, HEIGHT, BLUE, BLACK, FPS, MAP_OFFSET_Y
 
 class RandomMap():
     def __init__(self):
@@ -29,7 +29,8 @@ class RandomMap():
 
     def draw_map(self, screen):
         for wall in self.walls:
-            pygame.draw.rect(screen, BLUE, wall, 2)
+            shifted = wall.move(0, MAP_OFFSET_Y)
+            pygame.draw.rect(screen, BLUE, shifted, 2)
 
 
     def generate_pacman_maze(self): 
