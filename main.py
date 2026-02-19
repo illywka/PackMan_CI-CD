@@ -120,7 +120,11 @@ if __name__ == "__main__":
         elif game_state == "game":
             player.update()
             ghosts_group.update()
-            player.sound_manager.play_sound_if_idle('ghosts_normal_move')
+
+            if not player.shielded:
+                player.sound_manager.play_sound_if_idle('ghosts_normal_move')
+            else:
+                player.sound_manager.stop_sound('ghosts_normal_move')
 
             collision = pygame.sprite.spritecollide(player, ghosts_group, False)
             real_collision = []
@@ -131,10 +135,14 @@ if __name__ == "__main__":
 
             if player.shielded:
                 for ghost in ghosts_group:
-                    ghost.is_scared = True
+                    if not ghost.is_scared:
+                        ghost.is_scared = True
+                        sound_manager.play_sound_if_idle('ghosts_turn_to_blue', loops = -1)
             else:
                 for ghost in ghosts_group:
-                    ghost.is_scared = False
+                    if ghost.is_scared:
+                        ghost.is_scared = False
+                        sound_manager.stop_sound('ghosts_turn_to_blue')
 
             for ghost in ghosts_group:
                 if ghost.pos.distance_to(ghost.start_pos) <= ghost.speed:
