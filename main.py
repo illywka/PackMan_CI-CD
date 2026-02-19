@@ -35,6 +35,7 @@ def init_game():
 
 def play_death_animation(_clock, _player):
     _player.sound_manager.stop_sound('ghosts_normal_move')
+    _player.sound_manager.stop_sound('ghosts_return_to_house')
     _player.sound_manager.play_sound('pacman_death')
 
     for frame in _player.animations["death"]:
@@ -120,8 +121,9 @@ if __name__ == "__main__":
         elif game_state == "game":
             player.update()
             ghosts_group.update()
+            any_ghost_dead = any(ghost.is_dead for ghost in ghosts_group)
 
-            if not player.shielded:
+            if not player.shielded and not any_ghost_dead:
                 player.sound_manager.play_sound_if_idle('ghosts_normal_move')
             else:
                 player.sound_manager.stop_sound('ghosts_normal_move')
@@ -146,6 +148,7 @@ if __name__ == "__main__":
 
             for ghost in ghosts_group:
                 if ghost.pos.distance_to(ghost.start_pos) <= ghost.speed:
+                    sound_manager.stop_sound('ghosts_return_to_house')
                     ghost.is_dead = False
                     
             if real_collision:
@@ -153,6 +156,9 @@ if __name__ == "__main__":
                     real_collision[0].is_scared = False
                     real_collision[0].is_dead = True
                     real_collision.pop()
+
+                    sound_manager.play_sound_if_idle('ghosts_return_to_house', loops = -1)
+
                     player.shielded = False
                     del player.active_boosts["shield"]
                 else:
