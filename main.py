@@ -6,11 +6,13 @@ from src.entities.pacman import Pacman
 from src.entities.ghost import Pinky, Inky, Clyde, Sue
 from src.map.randomized_map import RandomMap
 from src.game_objects.object_manager import ObjectManager
+from src.audio.sound_manager import SoundManager
 
 game_map = None
 player = None
 ghosts_group = None
 objects = None
+sound_manager = None
 
 def init_game():
     global game_map, player, ghosts_group, objects
@@ -59,6 +61,7 @@ def draw_score(screen, font, score):
 if __name__ == "__main__":
     pygame.init() 
 
+    sound_manager = SoundManager()
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     clock = pygame.time.Clock()
     font = pygame.font.SysFont(None, 28)
@@ -91,9 +94,11 @@ if __name__ == "__main__":
         if event.type == pygame.MOUSEBUTTONDOWN:
             if game_state == "menu":
                 if play_btn_rect.collidepoint(event.pos):
+                    sound_manager.play_sound('game_select_button')
                     init_game()
                     game_state = "game"
                 if menu_btn_rect.collidepoint(event.pos):
+                    sound_manager.play_sound('game_select_button')
                     game_state = "settings"
 
         if game_state == "menu":
