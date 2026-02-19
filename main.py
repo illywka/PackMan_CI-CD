@@ -62,6 +62,9 @@ if __name__ == "__main__":
     pygame.init() 
 
     sound_manager = SoundManager()
+
+    sound_manager.play_sound_if_idle('pacman_menu_theme')
+
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     clock = pygame.time.Clock()
     font = pygame.font.SysFont(None, 28)
@@ -95,6 +98,7 @@ if __name__ == "__main__":
             if game_state == "menu":
                 if play_btn_rect.collidepoint(event.pos):
                     sound_manager.play_sound('game_select_button')
+                    sound_manager.stop_sound('pacman_menu_theme')
                     init_game()
                     game_state = "game"
                 if menu_btn_rect.collidepoint(event.pos):
@@ -102,6 +106,7 @@ if __name__ == "__main__":
                     game_state = "settings"
 
         if game_state == "menu":
+            sound_manager.play_sound_if_idle('pacman_menu_theme', loops=-1)
             screen.blit(startpage_img, (0, 0))
             screen.blit(play_btn_img, play_btn_rect)
             screen.blit(menu_btn_img, menu_btn_rect)
