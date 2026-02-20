@@ -25,7 +25,7 @@ class Ghost(pygame.sprite.Sprite, ABC):
 
         empty_tile = random.choice(self.find_empty_center_tiles())
         self.start_pos = pygame.Vector2(empty_tile[1]*TILE_SIZE, empty_tile[0]*TILE_SIZE)
-        self.pos = self.start_pos
+        self.pos = self.start_pos.copy()
 
         self.pacman = pacman
 

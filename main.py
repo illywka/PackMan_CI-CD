@@ -14,7 +14,7 @@ objects = None
 
 def init_game():
     global game_map, player, ghosts_group, objects
-    if random.random() < 1.5:
+    if random.random() < 0.5:
         game_map = Map()
     else:
         game_map = RandomMap()
