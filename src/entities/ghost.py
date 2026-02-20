@@ -85,7 +85,6 @@ class Ghost(pygame.sprite.Sprite, ABC):
                 if self.pos == [tile[1]*TILE_SIZE, tile[0]*TILE_SIZE]:
                     self.pos.x = open_tile[1]*TILE_SIZE
                     self.pos.y = (open_tile[0]-2)*TILE_SIZE
-                    print(self.pos)
         return
 
     def change_sprite(self):
@@ -109,7 +108,6 @@ class Ghost(pygame.sprite.Sprite, ABC):
         
         return self.sprite_dead.subsurface((self.sprite_start, self.sprite_width))
 
-    
     def bfs_original(self, matrix, start, goal):
         rows, cols = len(matrix), len(matrix[0])
         queue = deque([start])
@@ -245,6 +243,7 @@ class Pinky(Ghost):
         return self.change_sprite()
 
     def move(self):
+
         if entity.is_centered(self):
             if self.is_dead:
                 self.speed = GHOST_SPEED * 2
@@ -255,16 +254,20 @@ class Pinky(Ghost):
 
             current_tile = (round(self.pos[1] / TILE_SIZE), round(self.pos[0] / TILE_SIZE))
             
-            if self.is_dead or self.is_scared:
+            if (self.pos.y//TILE_SIZE, self.pos.x//TILE_SIZE) in self.find_empty_center_tiles():
+                empty_tile = random.choice(self.find_empty_center_tiles())
+                target_tile = (empty_tile[0], empty_tile[1])
+            elif self.is_dead or self.is_scared:
                 target_tile = (round(self.start_pos[1] / TILE_SIZE), round(self.start_pos[0] / TILE_SIZE))
             else:
                 target_tile = self.predict_future_position(self.directions)
 
             self.path = self.bfs_original(self.game_map.level, current_tile, target_tile)
+            
 
             if self.path and len(self.path) > 0:
                 self.next_direction = pygame.Vector2(self.path[0])
-                    
+
         if self.direction != self.next_direction:
             if not entity.check_collision(self, self.next_direction):
                 self.direction = self.next_direction
@@ -305,8 +308,10 @@ class Inky(Ghost):
                 self.speed = GHOST_SPEED
 
             current_tile = (round(self.pos[1] / TILE_SIZE), round(self.pos[0] / TILE_SIZE))
-            
-            if self.is_dead or self.is_scared:
+            if (self.pos.y//TILE_SIZE, self.pos.x//TILE_SIZE) in self.find_empty_center_tiles():
+                empty_tile = random.choice(self.find_empty_center_tiles())
+                target_tile = (empty_tile[0], empty_tile[1])
+            elif self.is_dead or self.is_scared:
                 target_tile = (round(self.start_pos[1] / TILE_SIZE), round(self.start_pos[0] / TILE_SIZE))
             else:
                 target_tile = self.predict_future_position(self.directions[::-1])
@@ -358,7 +363,11 @@ class Sue(Ghost):
 
             current_tile = (round(self.pos[1] / TILE_SIZE), round(self.pos[0] / TILE_SIZE))
             
-            if self.is_dead or self.is_scared:
+
+            if (self.pos.y//TILE_SIZE, self.pos.x//TILE_SIZE) in self.find_empty_center_tiles():
+                empty_tile = random.choice(self.find_empty_center_tiles())
+                target_tile = (empty_tile[0], empty_tile[1])
+            elif self.is_dead or self.is_scared:
                 target_tile = (round(self.start_pos[1] / TILE_SIZE), round(self.start_pos[0] / TILE_SIZE))
             else:
                 target_tile = (round(self.pacman.pos[1] / TILE_SIZE), round(self.pacman.pos[0] / TILE_SIZE))
@@ -408,8 +417,11 @@ class Clyde(Ghost):
                 self.speed = GHOST_SPEED
 
             current_tile = (round(self.pos[1] / TILE_SIZE), round(self.pos[0] / TILE_SIZE))
-            
-            if self.is_dead or self.is_scared:
+
+            if (self.pos.y//TILE_SIZE, self.pos.x//TILE_SIZE) in self.find_empty_center_tiles():
+                empty_tile = random.choice(self.find_empty_center_tiles())
+                target_tile = (empty_tile[0], empty_tile[1])
+            elif self.is_dead or self.is_scared:
                 target_tile = (round(self.start_pos[1] / TILE_SIZE), round(self.start_pos[0] / TILE_SIZE))
             else:
                 target_tile = (self.x, self.y)
