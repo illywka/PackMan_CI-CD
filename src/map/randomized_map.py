@@ -55,7 +55,7 @@ class RandomMap():
                 else:
                     level[y][x] = 0
 
-        level[cy - 2][cx] = 0
+        level[cy - 2][cx] = 2
         level[cy - 3][cx] = 0
 
         for y in range(2, GRID_HEIGHT - 2, 2):
