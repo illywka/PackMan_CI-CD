@@ -80,12 +80,11 @@ class Ghost(pygame.sprite.Sprite, ABC):
 
         tick = (pygame.time.get_ticks() - self.spawn_time)//FPS
 
-        if tick >= FPS*self.time_out:
-            for tile in self.find_empty_center_tiles():
-                if self.pos == [tile[1]*TILE_SIZE, tile[0]*TILE_SIZE]:
-                    self.pos.x = open_tile[1]*TILE_SIZE
-                    self.pos.y = (open_tile[0]-2)*TILE_SIZE
-        return
+        if (self.pos.y//TILE_SIZE, self.pos.x//TILE_SIZE) in self.find_empty_center_tiles():
+            if tick >= FPS*self.time_out:
+                return True, (open_tile[0]-2, open_tile[1])
+    
+        return False
 
     def change_sprite(self):
         tick = (pygame.time.get_ticks()//(FPS*4))%2
@@ -134,7 +133,7 @@ class Ghost(pygame.sprite.Sprite, ABC):
                 
                 neighbor = (r, c)
                 
-                if matrix[r][c] == 0 and neighbor not in visited:
+                if matrix[r][c] != 1 and neighbor not in visited:
                     visited[neighbor] = current
                     queue.append(neighbor)
         
@@ -166,7 +165,7 @@ class Ghost(pygame.sprite.Sprite, ABC):
                 
                 neighbor = (r, c)
                 
-                if matrix[r][c] == 0 and pygame.Vector2(c*TILE_SIZE, r*TILE_SIZE) != self.pacman.pos and neighbor not in visited:
+                if matrix[r][c] != 1 and pygame.Vector2(c*TILE_SIZE, r*TILE_SIZE) != self.pacman.pos and neighbor not in visited:
                     visited[neighbor] = current
                     queue.append(neighbor)
         
@@ -243,7 +242,6 @@ class Pinky(Ghost):
         return self.change_sprite()
 
     def move(self):
-
         if entity.is_centered(self):
             if self.is_dead:
                 self.speed = GHOST_SPEED * 2
@@ -253,8 +251,9 @@ class Pinky(Ghost):
                 self.speed = GHOST_SPEED
 
             current_tile = (round(self.pos[1] / TILE_SIZE), round(self.pos[0] / TILE_SIZE))
-            
-            if (self.pos.y//TILE_SIZE, self.pos.x//TILE_SIZE) in self.find_empty_center_tiles():
+            if self.open_tile_for_ghost():
+                _, target_tile = self.open_tile_for_ghost()    
+            elif (self.pos.y//TILE_SIZE, self.pos.x//TILE_SIZE) in self.find_empty_center_tiles():
                 empty_tile = random.choice(self.find_empty_center_tiles())
                 target_tile = (empty_tile[0], empty_tile[1])
             elif self.is_dead or self.is_scared:
@@ -264,7 +263,6 @@ class Pinky(Ghost):
 
             self.path = self.bfs_original(self.game_map.level, current_tile, target_tile)
             
-
             if self.path and len(self.path) > 0:
                 self.next_direction = pygame.Vector2(self.path[0])
 
@@ -308,7 +306,9 @@ class Inky(Ghost):
                 self.speed = GHOST_SPEED
 
             current_tile = (round(self.pos[1] / TILE_SIZE), round(self.pos[0] / TILE_SIZE))
-            if (self.pos.y//TILE_SIZE, self.pos.x//TILE_SIZE) in self.find_empty_center_tiles():
+            if self.open_tile_for_ghost():
+                _, target_tile = self.open_tile_for_ghost()  
+            elif (self.pos.y//TILE_SIZE, self.pos.x//TILE_SIZE) in self.find_empty_center_tiles():
                 empty_tile = random.choice(self.find_empty_center_tiles())
                 target_tile = (empty_tile[0], empty_tile[1])
             elif self.is_dead or self.is_scared:
@@ -363,8 +363,9 @@ class Sue(Ghost):
 
             current_tile = (round(self.pos[1] / TILE_SIZE), round(self.pos[0] / TILE_SIZE))
             
-
-            if (self.pos.y//TILE_SIZE, self.pos.x//TILE_SIZE) in self.find_empty_center_tiles():
+            if self.open_tile_for_ghost():
+                _, target_tile = self.open_tile_for_ghost()  
+            elif (self.pos.y//TILE_SIZE, self.pos.x//TILE_SIZE) in self.find_empty_center_tiles():
                 empty_tile = random.choice(self.find_empty_center_tiles())
                 target_tile = (empty_tile[0], empty_tile[1])
             elif self.is_dead or self.is_scared:
@@ -418,7 +419,9 @@ class Clyde(Ghost):
 
             current_tile = (round(self.pos[1] / TILE_SIZE), round(self.pos[0] / TILE_SIZE))
 
-            if (self.pos.y//TILE_SIZE, self.pos.x//TILE_SIZE) in self.find_empty_center_tiles():
+            if self.open_tile_for_ghost():
+                _, target_tile = self.open_tile_for_ghost()  
+            elif (self.pos.y//TILE_SIZE, self.pos.x//TILE_SIZE) in self.find_empty_center_tiles():
                 empty_tile = random.choice(self.find_empty_center_tiles())
                 target_tile = (empty_tile[0], empty_tile[1])
             elif self.is_dead or self.is_scared:

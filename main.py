@@ -134,7 +134,6 @@ if __name__ == "__main__":
                     player.shielded = False
                     del player.active_boosts["shield"]
                 else:
-                    '''
                     player.lives -= 1
                     play_death_animation(clock, player)
                     pygame.time.delay(300)
@@ -144,7 +143,7 @@ if __name__ == "__main__":
                     else:
                         player.reset_position()
                         for ghost in ghosts_group:
-                            ghost.reset_position()'''
+                            ghost.reset_position()
 
             screen.fill(BLACK)
             game_map.draw_map(screen)
