@@ -14,8 +14,6 @@ class Ghost(pygame.sprite.Sprite, ABC):
         super().__init__()
 
         self.rect = pygame.Rect(9*TILE_SIZE, 12*TILE_SIZE, TILE_SIZE, TILE_SIZE)
-        self.pos = pygame.Vector2(self.rect.topleft)
-        self.start_pos = pygame.Vector2(self.rect.topleft)
         self.x = 1
         self.y = 1
         self.speed = GHOST_SPEED
@@ -24,6 +22,11 @@ class Ghost(pygame.sprite.Sprite, ABC):
         self.next_direction = pygame.Vector2(0, 0)
         self.clock = pygame.time.Clock()
         self.game_map = game_map
+
+        empty_tile = random.choice(self.find_empty_center_tiles())
+        self.start_pos = pygame.Vector2(empty_tile[1]*TILE_SIZE, empty_tile[0]*TILE_SIZE)
+        self.pos = self.start_pos
+
         self.pacman = pacman
 
         self.path = [[0, 0]]
@@ -80,7 +83,8 @@ class Ghost(pygame.sprite.Sprite, ABC):
         if tick >= FPS*self.time_out:
             for tile in self.find_empty_center_tiles():
                 if self.pos == [tile[1]*TILE_SIZE, tile[0]*TILE_SIZE]:
-                    self.pos = [open_tile[1]*TILE_SIZE, (open_tile[0]-2)*TILE_SIZE]
+                    self.pos.x = open_tile[1]*TILE_SIZE
+                    self.pos.y = (open_tile[0]-2)*TILE_SIZE
                     print(self.pos)
         return
 
@@ -232,7 +236,6 @@ class Ghost(pygame.sprite.Sprite, ABC):
 #Pinky, Inky, Sue, Clyde
 class Pinky(Ghost):
     sprite = pygame.image.load(f'src/assets/ghosts/pink_ghost/pink_ghost.png')
-    
     def __init__(self, game_map, pacman):
         self.time_out = 1
         super().__init__(game_map, pacman)
