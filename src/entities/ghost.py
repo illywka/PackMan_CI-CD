@@ -226,6 +226,9 @@ class Ghost(pygame.sprite.Sprite, ABC):
     def move(self):
         if self.direction != self.next_direction:
             if not entity.check_collision(self, self.next_direction):
+                self.pos.x = round(self.pos.x / TILE_SIZE) * TILE_SIZE
+                self.pos.y = round(self.pos.y / TILE_SIZE) * TILE_SIZE
+                
                 self.direction = self.next_direction
 
         if self.rect.right < 0:
