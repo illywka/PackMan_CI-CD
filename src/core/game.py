@@ -8,6 +8,7 @@ from src.entities.pacman import Pacman
 from src.entities.ghost import Pinky, Inky, Clyde, Sue
 from src.map.randomized_map import RandomMap
 from src.game_objects.object_manager import ObjectManager
+from src.core.pause import Pause
 
 class Game():
     def __init__(self):
@@ -21,6 +22,9 @@ class Game():
         self.player = None
         self.ghosts_group = None
         self.objects = None
+        self.pause_menu = None
+        self.paused = False
+        self.escape_pressed = False
 
         self.game_state = "menu"
 
@@ -45,6 +49,8 @@ class Game():
 
         self.objects = ObjectManager(self.game_map)
         self.objects.spawn_pellets(self.player)
+
+        self.pause_menu = Pause()
 
     def load_assets(self):
         self.startpage_img = pygame.image.load('src/assets/interface/startpage/startpage.png').convert_alpha()
@@ -93,6 +99,14 @@ class Game():
                 if event.type == pygame.QUIT:
                     running = False
 
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE and self.game_state == "game" and not self.escape_pressed:
+                    self.paused = not self.paused
+                    self.escape_pressed = True
+            if event.type == pygame.KEYUP:
+                if event.key == pygame.K_ESCAPE:
+                    self.escape_pressed = False 
+
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if self.game_state == "menu":
                     if self.play_btn_rect.collidepoint(event.pos):
@@ -113,48 +127,53 @@ class Game():
                 self.screen.blit(self.hard_mode_btn_img, self.hard_mode_btn_rect)
 
             elif self.game_state == "game":
-                self.player.update()
-                self.ghosts_group.update()
+                if not self.paused:
+                    self.player.update()
+                    self.ghosts_group.update()
 
-                collision = pygame.sprite.spritecollide(self.player, self.ghosts_group, False)
-                real_collision = []
+                    self.objects.update_boost()
+                    self.objects.update_objects(self.player)
 
-                for i in range(len(collision)):
-                    if collision[i].is_dead != True:
-                        real_collision = [collision[i]]
+                    collision = pygame.sprite.spritecollide(self.player, self.ghosts_group, False)
+                    real_collision = []
 
-                for ghost in self.ghosts_group:
-                    ghost.is_scared = self.player.shielded
-                        
-                if real_collision:
-                    if self.player.shielded:
-                        real_collision[0].is_scared = False
-                        real_collision[0].is_dead = True
-                        real_collision.pop()
-                        self.player.shielded = False
-                        del self.player.active_boosts["shield"]
-                    else:
-                        self.player.lives -= 1
-                        self.play_death_animation()
-                        pygame.time.delay(300)
+                    for i in range(len(collision)):
+                        if collision[i].is_dead != True:
+                            real_collision = [collision[i]]
 
-                        if self.player.lives <= 0:
-                            self.game_state = "menu"
+                    for ghost in self.ghosts_group:
+                        ghost.is_scared = self.player.shielded
+                            
+                    if real_collision:
+                        if self.player.shielded:
+                            real_collision[0].is_scared = False
+                            real_collision[0].is_dead = True
+                            real_collision.pop()
+                            self.player.shielded = False
+                            del self.player.active_boosts["shield"]
                         else:
-                            entity.reset_position(self.player)
-                            for ghost in self.ghosts_group:
-                                ghost.spawn_time = pygame.time.get_ticks()
-                                entity.reset_position(ghost)
+                            self.player.lives -= 1
+                            self.play_death_animation()
+                            pygame.time.delay(300)
+
+                            if self.player.lives <= 0:
+                                self.game_state = "menu"
+                            else:
+                                entity.reset_position(self.player)
+                                for ghost in self.ghosts_group:
+                                    ghost.spawn_time = pygame.time.get_ticks()
+                                    entity.reset_position(ghost)
 
                 self.screen.fill(BLACK)
                 self.game_map.draw_map(self.screen)
-                self.objects.update_boost()
-                self.objects.update_objects(self.player)
                 self.objects.draw_objects(self.screen)
                 self.screen.blit(self.player.image, self.player.rect.move(0, MAP_OFFSET_Y))
                 for ghost in self.ghosts_group:
                     self.screen.blit(ghost.image, ghost.rect.move(0, MAP_OFFSET_Y))
                 self.draw_score()
+
+                if self.paused:
+                    self.pause_menu.draw(self.screen)
 
             pygame.display.flip()
             self.clock.tick(FPS)
